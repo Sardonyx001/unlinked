@@ -1,0 +1,183 @@
+version: '3'
+
+vars:
+  BINARY_NAME: unlinked
+  BUILD_DIR: bin
+  CMD_DIR: cmd/unlinked
+  VERSION:
+    sh: git describe --tags --always --dirty 2>/dev/null || echo "dev"
+  BUILD_TIME:
+    sh: date -u '+%Y-%m-%d_%H:%M:%S'
+  GIT_COMMIT:
+    sh: git rev-parse HEAD 2>/dev/null || echo "unknown"
+  GIT_BRANCH:
+    sh: git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown"
+  LDFLAGS: >-
+    -s -w
+    -X github.com/sardonyx001/unlinked/internal/version.Version={{.VERSION}}
+    -X github.com/sardonyx001/unlinked/internal/version.BuildTime={{.BUILD_TIME}}
+    -X github.com/sardonyx001/unlinked/internal/version.GitCommit={{.GIT_COMMIT}}
+    -X github.com/sardonyx001/unlinked/internal/version.GitBranch={{.GIT_BRANCH}}
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  build:
+    desc: Build the binary
+    cmds:
+      - mkdir -p {{.BUILD_DIR}}
+      - go build -ldflags "{{.LDFLAGS}}" -o {{.BUILD_DIR}}/{{.BINARY_NAME}} ./{{.CMD_DIR}}
+    sources:
+      - "**/*.go"
+      - go.mod
+      - go.sum
+    generates:
+      - "{{.BUILD_DIR}}/{{.BINARY_NAME}}"
+
+  build-all:
+    desc: Build for all platforms
+    cmds:
+      - task: build-linux
+      - task: build-darwin
+      - task: build-windows
+
+  build-linux:
+    desc: Build for Linux (amd64 and arm64)
+    cmds:
+      - mkdir -p {{.BUILD_DIR}}
+      - GOOS=linux GOARCH=amd64 go build -ldflags "{{.LDFLAGS}}" -o {{.BUILD_DIR}}/{{.BINARY_NAME}}-linux-amd64 ./{{.CMD_DIR}}
+      - GOOS=linux GOARCH=arm64 go build -ldflags "{{.LDFLAGS}}" -o {{.BUILD_DIR}}/{{.BINARY_NAME}}-linux-arm64 ./{{.CMD_DIR}}
+
+  build-darwin:
+    desc: Build for macOS (amd64 and arm64)
+    cmds:
+      - mkdir -p {{.BUILD_DIR}}
+      - GOOS=darwin GOARCH=amd64 go build -ldflags "{{.LDFLAGS}}" -o {{.BUILD_DIR}}/{{.BINARY_NAME}}-darwin-amd64 ./{{.CMD_DIR}}
+      - GOOS=darwin GOARCH=arm64 go build -ldflags "{{.LDFLAGS}}" -o {{.BUILD_DIR}}/{{.BINARY_NAME}}-darwin-arm64 ./{{.CMD_DIR}}
+
+  build-windows:
+    desc: Build for Windows (amd64)
+    cmds:
+      - mkdir -p {{.BUILD_DIR}}
+      - GOOS=windows GOARCH=amd64 go build -ldflags "{{.LDFLAGS}}" -o {{.BUILD_DIR}}/{{.BINARY_NAME}}-windows-amd64.exe ./{{.CMD_DIR}}
+
+  install:
+    desc: Install the binary to $GOPATH/bin
+    deps: [build]
+    cmds:
+      - go install -ldflags "{{.LDFLAGS}}" ./{{.CMD_DIR}}
+
+  run:
+    desc: Run the application with arguments (use -- to pass args)
+    cmds:
+      - go run ./{{.CMD_DIR}} {{.CLI_ARGS}}
+
+  test:
+    desc: Run tests
+    cmds:
+      - go test -v -race -coverprofile=coverage.out ./...
+
+  test-coverage:
+    desc: Run tests and show coverage
+    deps: [test]
+    cmds:
+      - go tool cover -html=coverage.out
+
+  bench:
+    desc: Run benchmarks
+    cmds:
+      - go test -bench=. -benchmem ./...
+
+  lint:
+    desc: Run linters
+    cmds:
+      - go fmt ./...
+      - go vet ./...
+      - |
+        if command -v golangci-lint &> /dev/null; then
+          golangci-lint run
+        else
+          echo "golangci-lint not found, skipping..."
+        fi
+
+  tidy:
+    desc: Tidy go modules
+    cmds:
+      - go mod tidy
+      - go mod verify
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - rm -rf {{.BUILD_DIR}}
+      - rm -f coverage.out
+      - go clean
+
+  deps:
+    desc: Download dependencies
+    cmds:
+      - go mod download
+
+  update-deps:
+    desc: Update all dependencies
+    cmds:
+      - go get -u ./...
+      - go mod tidy
+
+  check:
+    desc: Run all checks (lint, test)
+    cmds:
+      - task: lint
+      - task: test
+
+  dev:
+    desc: Run in development mode with hot reload (requires air)
+    cmds:
+      - |
+        if command -v air &> /dev/null; then
+          air
+        else
+          echo "air not found. Install with: go install github.com/air-verse/air@latest"
+          exit 1
+        fi
+
+  example-single:
+    desc: Example - Check a single URL
+    deps: [build]
+    cmds:
+      - ./{{.BUILD_DIR}}/{{.BINARY_NAME}} https://golang.org
+
+  example-multiple:
+    desc: Example - Check multiple URLs
+    deps: [build]
+    cmds:
+      - ./{{.BUILD_DIR}}/{{.BINARY_NAME}} https://golang.org https://go.dev
+
+  example-crawler:
+    desc: Example - Crawl a site and check links
+    deps: [build]
+    cmds:
+      - ./{{.BUILD_DIR}}/{{.BINARY_NAME}} --mode=crawler --max-depth=2 https://golang.org
+
+  example-markdown:
+    desc: Example - Output as markdown
+    deps: [build]
+    cmds:
+      - ./{{.BUILD_DIR}}/{{.BINARY_NAME}} --output-format=markdown --output-file=report.md https://golang.org
+      - cat report.md
+
+  example-html:
+    desc: Example - Output as HTML
+    deps: [build]
+    cmds:
+      - ./{{.BUILD_DIR}}/{{.BINARY_NAME}} --output-format=html --output-file=report.html https://golang.org
+      - echo "Report generated at report.html"
+
+  help:
+    desc: Show help for the CLI
+    deps: [build]
+    cmds:
+      - ./{{.BUILD_DIR}}/{{.BINARY_NAME}} --help

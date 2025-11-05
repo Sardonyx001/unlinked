@@ -1,0 +1,177 @@
+# Unlinked Configuration File
+# Copy this file to ~/.config/unlinked/config.yaml or ./config.yaml
+
+# ==============================================================================
+# Check Mode Configuration
+# ==============================================================================
+
+# Check mode: "single" or "crawler"
+# - single: Only check the URLs provided
+# - crawler: Crawl the website and check all discovered links
+mode: single
+
+# ==============================================================================
+# Output Configuration
+# ==============================================================================
+
+# Output format: "plaintext", "markdown", "html", or "json"
+output_format: plaintext
+
+# Output file path (leave empty for stdout)
+output_file: ""
+
+# ==============================================================================
+# Performance Configuration
+# ==============================================================================
+
+# Number of concurrent link checks (1-100)
+# Higher values = faster but more resource intensive
+concurrency: 10
+
+# Request timeout in seconds
+# How long to wait for each link to respond
+timeout: 30
+
+# ==============================================================================
+# Crawler Configuration
+# ==============================================================================
+
+# Maximum crawl depth (only applies in crawler mode)
+# 1 = only links on the start page
+# 2 = links on start page + one level deeper
+# etc.
+max_depth: 3
+
+# Follow HTTP redirects
+follow_redirects: true
+
+# Only check external links (links to different domains)
+# Useful when you trust internal links but want to verify external ones
+check_external_only: false
+
+# ==============================================================================
+# Network Configuration
+# ==============================================================================
+
+# User agent string sent with requests
+user_agent: "Unlinked/1.0 (Dead Link Checker)"
+
+# Respect robots.txt files
+# If true, will skip URLs disallowed by robots.txt
+respect_robots_txt: true
+
+# ==============================================================================
+# Domain Restrictions (Crawler Mode)
+# ==============================================================================
+
+# List of allowed domains for crawling
+# If empty, all domains are allowed
+# Only applies in crawler mode
+allowed_domains: []
+  # - example.com
+  # - subdomain.example.com
+  # - another-domain.org
+
+# ==============================================================================
+# URL Filtering
+# ==============================================================================
+
+# Regular expression patterns to ignore
+# Links matching any of these patterns will be skipped
+ignore_patterns:
+  # File downloads
+  - ".*\\.pdf$"
+  - ".*\\.zip$"
+  - ".*\\.tar\\.gz$"
+  - ".*\\.exe$"
+  - ".*\\.dmg$"
+
+  # Media files
+  - ".*\\.mp4$"
+  - ".*\\.mp3$"
+  - ".*\\.avi$"
+  - ".*\\.mov$"
+
+  # Anchors (same-page links)
+  - "#.*"
+
+  # Special protocols
+  - "mailto:.*"
+  - "tel:.*"
+  - "javascript:.*"
+  - "data:.*"
+
+  # Social media tracking parameters
+  - ".*utm_.*"
+
+  # Example: Ignore admin pages
+  # - ".*/admin/.*"
+  # - ".*/wp-admin/.*"
+
+# ==============================================================================
+# Display Configuration
+# ==============================================================================
+
+# Enable verbose output
+# Shows detailed information about each check
+verbose: false
+
+# Show progress display
+# Disable for non-interactive environments (CI/CD, scripts)
+show_progress: true
+
+# ==============================================================================
+# Example Configurations
+# ==============================================================================
+
+# Example 1: Fast Local Development Checks
+# ----------------------------------------
+# mode: single
+# concurrency: 20
+# timeout: 10
+# output_format: plaintext
+# show_progress: true
+# ignore_patterns:
+#   - ".*\\.pdf$"
+#   - "#.*"
+
+# Example 2: Thorough Website Audit
+# ----------------------------------
+# mode: crawler
+# max_depth: 5
+# concurrency: 10
+# timeout: 60
+# output_format: html
+# output_file: audit-report.html
+# respect_robots_txt: true
+# follow_redirects: true
+
+# Example 3: External Link Validation Only
+# -----------------------------------------
+# mode: crawler
+# check_external_only: true
+# concurrency: 15
+# timeout: 30
+# output_format: markdown
+# output_file: external-links.md
+
+# Example 4: CI/CD Integration
+# -----------------------------
+# mode: single
+# concurrency: 20
+# timeout: 30
+# output_format: json
+# output_file: link-check-results.json
+# show_progress: false
+# verbose: false
+
+# Example 5: Restricted Domain Crawling
+# --------------------------------------
+# mode: crawler
+# allowed_domains:
+#   - mysite.com
+#   - blog.mysite.com
+# max_depth: 4
+# ignore_patterns:
+#   - ".*/admin/.*"
+#   - ".*/private/.*"
