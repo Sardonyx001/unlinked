@@ -181,3 +181,15 @@ tasks:
     deps: [build]
     cmds:
       - ./{{.BUILD_DIR}}/{{.BINARY_NAME}} --help
+
+  version:
+    desc: Show version information
+    deps: [build]
+    cmds:
+      - ./{{.BUILD_DIR}}/{{.BINARY_NAME}} version
+
+  version-short:
+    desc: Show short version
+    deps: [build]
+    cmds:
+      - ./{{.BUILD_DIR}}/{{.BINARY_NAME}} version --short
