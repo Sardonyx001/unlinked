@@ -2,8 +2,10 @@
 
 A modern, fast, and beautiful dead link checker CLI built with Go. Unlinked helps you find and fix broken links on websites with style.
 
-![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat&logo=go)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+[![CI](https://github.com/sardonyx001/unlinked/workflows/CI/badge.svg)](https://github.com/sardonyx001/unlinked/actions/workflows/ci.yml)
+[![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat&logo=go)](https://go.dev)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![codecov](https://codecov.io/gh/sardonyx001/unlinked/branch/main/graph/badge.svg)](https://codecov.io/gh/sardonyx001/unlinked)
 
 ## Features
 
