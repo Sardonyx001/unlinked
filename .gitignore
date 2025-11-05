@@ -4,7 +4,6 @@
 *.dll
 *.so
 *.dylib
-unlinked
 dist/
 bin/
 
@@ -35,7 +34,6 @@ config.yaml
 
 # Output files
 *.html
-*.md
 reports/
 
 # Temporary files
@@ -43,7 +41,5 @@ tmp/
 temp/
 
 # Test files
-test-urls.txt
-*.old
 .task
 .claude
