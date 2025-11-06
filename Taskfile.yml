@@ -18,6 +18,12 @@ vars:
     -X github.com/sardonyx001/unlinked/internal/version.BuildTime={{.BUILD_TIME}}
     -X github.com/sardonyx001/unlinked/internal/version.GitCommit={{.GIT_COMMIT}}
     -X github.com/sardonyx001/unlinked/internal/version.GitBranch={{.GIT_BRANCH}}
+  STATIC_LDFLAGS: >-
+    -s -w -extldflags '-static'
+    -X github.com/sardonyx001/unlinked/internal/version.Version={{.VERSION}}
+    -X github.com/sardonyx001/unlinked/internal/version.BuildTime={{.BUILD_TIME}}
+    -X github.com/sardonyx001/unlinked/internal/version.GitCommit={{.GIT_COMMIT}}
+    -X github.com/sardonyx001/unlinked/internal/version.GitBranch={{.GIT_BRANCH}}
 
 tasks:
   default:
@@ -26,7 +32,19 @@ tasks:
       - task --list
 
   build:
-    desc: Build the binary
+    desc: Build the binary (static, optimized)
+    cmds:
+      - mkdir -p {{.BUILD_DIR}}
+      - CGO_ENABLED=0 go build -trimpath -ldflags "{{.STATIC_LDFLAGS}}" -tags netgo,osusergo -o {{.BUILD_DIR}}/{{.BINARY_NAME}} ./{{.CMD_DIR}}
+    sources:
+      - "**/*.go"
+      - go.mod
+      - go.sum
+    generates:
+      - "{{.BUILD_DIR}}/{{.BINARY_NAME}}"
+
+  build-dynamic:
+    desc: Build dynamic binary (non-static, for debugging)
     cmds:
       - mkdir -p {{.BUILD_DIR}}
       - go build -ldflags "{{.LDFLAGS}}" -o {{.BUILD_DIR}}/{{.BINARY_NAME}} ./{{.CMD_DIR}}
@@ -45,24 +63,24 @@ tasks:
       - task: build-windows
 
   build-linux:
-    desc: Build for Linux (amd64 and arm64)
+    desc: Build for Linux (amd64 and arm64) with static linking
     cmds:
       - mkdir -p {{.BUILD_DIR}}
-      - GOOS=linux GOARCH=amd64 go build -ldflags "{{.LDFLAGS}}" -o {{.BUILD_DIR}}/{{.BINARY_NAME}}-linux-amd64 ./{{.CMD_DIR}}
-      - GOOS=linux GOARCH=arm64 go build -ldflags "{{.LDFLAGS}}" -o {{.BUILD_DIR}}/{{.BINARY_NAME}}-linux-arm64 ./{{.CMD_DIR}}
+      - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "{{.STATIC_LDFLAGS}}" -tags netgo,osusergo -o {{.BUILD_DIR}}/{{.BINARY_NAME}}-linux-amd64 ./{{.CMD_DIR}}
+      - CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -ldflags "{{.STATIC_LDFLAGS}}" -tags netgo,osusergo -o {{.BUILD_DIR}}/{{.BINARY_NAME}}-linux-arm64 ./{{.CMD_DIR}}
 
   build-darwin:
-    desc: Build for macOS (amd64 and arm64)
+    desc: Build for macOS (amd64 and arm64) with static linking
     cmds:
       - mkdir -p {{.BUILD_DIR}}
-      - GOOS=darwin GOARCH=amd64 go build -ldflags "{{.LDFLAGS}}" -o {{.BUILD_DIR}}/{{.BINARY_NAME}}-darwin-amd64 ./{{.CMD_DIR}}
-      - GOOS=darwin GOARCH=arm64 go build -ldflags "{{.LDFLAGS}}" -o {{.BUILD_DIR}}/{{.BINARY_NAME}}-darwin-arm64 ./{{.CMD_DIR}}
+      - CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags "{{.STATIC_LDFLAGS}}" -tags netgo,osusergo -o {{.BUILD_DIR}}/{{.BINARY_NAME}}-darwin-amd64 ./{{.CMD_DIR}}
+      - CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags "{{.STATIC_LDFLAGS}}" -tags netgo,osusergo -o {{.BUILD_DIR}}/{{.BINARY_NAME}}-darwin-arm64 ./{{.CMD_DIR}}
 
   build-windows:
-    desc: Build for Windows (amd64)
+    desc: Build for Windows (amd64) with static linking
     cmds:
       - mkdir -p {{.BUILD_DIR}}
-      - GOOS=windows GOARCH=amd64 go build -ldflags "{{.LDFLAGS}}" -o {{.BUILD_DIR}}/{{.BINARY_NAME}}-windows-amd64.exe ./{{.CMD_DIR}}
+      - CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "{{.STATIC_LDFLAGS}}" -tags netgo,osusergo -o {{.BUILD_DIR}}/{{.BINARY_NAME}}-windows-amd64.exe ./{{.CMD_DIR}}
 
   install:
     desc: Install the binary to $GOPATH/bin

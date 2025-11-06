@@ -12,7 +12,6 @@ import (
 )
 
 var (
-	// Styles
 	titleStyle = lipgloss.NewStyle().
 			Bold(true).
 			Foreground(lipgloss.Color("#7D56F4")).
@@ -39,30 +38,26 @@ var (
 			MarginTop(1)
 )
 
-// ProgressMsg represents a progress update
 type ProgressMsg struct {
 	URL    string
 	Status types.LinkStatus
 }
 
-// DoneMsg signals completion
 type DoneMsg struct {
 	Result *types.CheckResult
 }
 
-// ProgressModel is the Bubble Tea model for progress display
 type ProgressModel struct {
-	spinner      spinner.Model
-	progress     progress.Model
-	currentURL   string
+	spinner       spinner.Model
+	progress      progress.Model
+	currentURL    string
 	currentStatus types.LinkStatus
-	stats        Stats
-	width        int
-	done         bool
-	result       *types.CheckResult
+	stats         Stats
+	width         int
+	done          bool
+	result        *types.CheckResult
 }
 
-// Stats holds checking statistics
 type Stats struct {
 	Total     int
 	OK        int
@@ -71,7 +66,6 @@ type Stats struct {
 	Errors    int
 }
 
-// NewProgressModel creates a new progress model
 func NewProgressModel() ProgressModel {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
@@ -88,12 +82,10 @@ func NewProgressModel() ProgressModel {
 	}
 }
 
-// Init initializes the model
 func (m ProgressModel) Init() tea.Cmd {
 	return m.spinner.Tick
 }
 
-// Update handles messages
 func (m ProgressModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -141,7 +133,6 @@ func (m ProgressModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-// View renders the model
 func (m ProgressModel) View() string {
 	if m.done && m.result != nil {
 		return m.renderFinalReport()
@@ -172,7 +163,6 @@ func (m ProgressModel) View() string {
 	return b.String()
 }
 
-// renderStatus renders a status badge
 func (m ProgressModel) renderStatus(status types.LinkStatus) string {
 	switch status {
 	case types.StatusOK:
@@ -188,7 +178,6 @@ func (m ProgressModel) renderStatus(status types.LinkStatus) string {
 	}
 }
 
-// renderStats renders the statistics box
 func (m ProgressModel) renderStats() string {
 	return statsStyle.Render(fmt.Sprintf(
 		"Total: %d  |  %s: %d  |  %s: %d  |  %s: %d  |  %s: %d",
@@ -204,7 +193,6 @@ func (m ProgressModel) renderStats() string {
 	))
 }
 
-// renderFinalReport renders the final report summary
 func (m ProgressModel) renderFinalReport() string {
 	var b strings.Builder
 
@@ -241,7 +229,6 @@ func (m ProgressModel) renderFinalReport() string {
 	return b.String()
 }
 
-// truncateURL truncates a URL to fit within a given width
 func truncateURL(url string, maxWidth int) string {
 	if len(url) <= maxWidth {
 		return url
@@ -249,7 +236,6 @@ func truncateURL(url string, maxWidth int) string {
 	return url[:maxWidth-3] + "..."
 }
 
-// Result returns the final result
 func (m ProgressModel) Result() *types.CheckResult {
 	return m.result
 }

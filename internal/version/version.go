@@ -6,17 +6,12 @@ import (
 )
 
 var (
-	// Version is the semantic version of the application
-	Version = "dev"
-	// BuildTime is the time the binary was built
+	Version   = "dev"
 	BuildTime = "unknown"
-	// GitCommit is the git commit hash
 	GitCommit = "unknown"
-	// GitBranch is the git branch
 	GitBranch = "unknown"
 )
 
-// Info represents version information
 type Info struct {
 	Version   string
 	BuildTime string
@@ -26,7 +21,6 @@ type Info struct {
 	Platform  string
 }
 
-// Get returns the version information
 func Get() Info {
 	return Info{
 		Version:   Version,
@@ -38,7 +32,6 @@ func Get() Info {
 	}
 }
 
-// String returns a formatted version string
 func (i Info) String() string {
 	return fmt.Sprintf(
 		"Unlinked %s\n"+
@@ -56,7 +49,6 @@ func (i Info) String() string {
 	)
 }
 
-// Short returns a short version string
 func (i Info) Short() string {
 	if i.GitCommit != "unknown" && len(i.GitCommit) > 7 {
 		return fmt.Sprintf("%s (%s)", i.Version, i.GitCommit[:7])

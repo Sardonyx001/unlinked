@@ -91,9 +91,6 @@ func (m *Manager) Set(key string, value interface{}) {
 	m.v.Unmarshal(m.config)
 }
 
-// Note: BindFlag is not needed with our current approach
-// We manually apply flags in the CLI layer
-
 // GetViper returns the underlying viper instance
 func (m *Manager) GetViper() *viper.Viper {
 	return m.v
